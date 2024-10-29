@@ -182,39 +182,42 @@ brfss_binary = brfss_binary.rename(columns={'Diabetes_012': 'Diabetes_binary'})
 def calculate_metalobic_geometric_with_BMI(row):
     # Assign BMI score based on ranges (1 for low risk, 2 for moderate risk, 3 for high risk)
     if row['BMI'] < 18.5:
-        bmi_score = 1  # Low risk for underweight
+        bmi_score = 0  # Low risk for underweight
     elif 18.5 <= row['BMI'] < 25:
-        bmi_score = 1  # Normal weight contributes less risk
+        bmi_score = 0  # Normal weight contributes less risk
     elif 25 <= row['BMI'] < 30:
-        bmi_score = 2  # Overweight contributes moderate risk
+        bmi_score = 1  # Overweight contributes moderate risk
     else:  # BMI >= 30
-        bmi_score = 3  # Obese contributes high risk
+        bmi_score = 2  # Obese contributes high risk
     
-    # Geometric risk calculation
     risk_score = (
-        (bmi_score ** (1/4)) * 
-        ((1 + row['HighBP']) ** (1/4)) * 
-        ((1 + row['HighChol']) ** (1/4)) * 
-        ((1 + row['HeartDiseaseorAttack']) ** (1/4)) * 
-        ((1 + row['Stroke']) ** (1/4))
+        (bmi_score * (1+row['HighBP']) * (1+row['HighChol']) * (1+row['HeartDiseaseorAttack']) * (1+(row['Stroke']))) ** (1/4)
     )
     
     return risk_score
 
 def calculate_metalobic_geometric_without_BMI(row):
-    # Geometric risk calculation without BMI
     risk_score = (
-        ((1 + row['HighBP']) ** (1/4)) * 
-        ((1 + row['HighChol']) ** (1/4)) * 
-        ((1 + row['HeartDiseaseorAttack']) ** (1/4)) * 
-        ((1 + row['Stroke']) ** (1/4))
-    )
+        (1+row['HighBP']) * (1+row['HighChol']) * (1+row['HeartDiseaseorAttack']) * (1+(row['Stroke']))
+    ) ** (1/4)
     
     return risk_score
+
+def calculate_new_metabolic_geometric_without_BMI(row):
+    new_risk_score = (
+        (1+row['HighBP'] * 0.9789) *  
+        (1+row['HighChol'] * 0.958) *  
+        (1+row['HeartDiseaseorAttack'] * 0.80) *  
+        (1+row['Stroke'] * 0.80)  
+    ) ** (1/4)  
+
+    return new_risk_score
 
 # # Apply the function to create a new column 'Diabetes_Risk_Index'
 brfss_binary['MetabolicDisorderWithBMI'] = brfss_binary.apply(calculate_metalobic_geometric_with_BMI, axis=1)
 brfss_binary['MetabolicDisorderWithoutBMI'] = brfss_binary.apply(calculate_metalobic_geometric_without_BMI, axis=1)
+brfss_binary['NewMetabolicDisorder'] = brfss_binary.apply(calculate_new_metabolic_geometric_without_BMI, axis=1)
+# print(brfss_binary.tail())
 
 # Get the cases for 1 (diabetic and prediabetic)
 is1 = brfss_binary['Diabetes_binary'] == 1
@@ -238,4 +241,48 @@ brfss_5050 = brfss_5050_0_rand1._append(brfss_5050_1, ignore_index=True)
 # print(brfss_5050.groupby(['Diabetes_binary']).size())
 
 # brfss_5050.to_csv('diabetes_binary_health_indicators_BRFSS2023.csv', sep=",", index=False)
-brfss_5050.to_csv('diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
+# brfss_5050.to_csv('diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
+# brfss_5050.to_csv('new_diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
+# brfss_5050.to_csv('test_diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
+
+old_mean = brfss_5050['MetabolicDisorderWithoutBMI'].mean()
+new_mean = brfss_5050['NewMetabolicDisorder'].mean()
+
+old_std = brfss_5050['MetabolicDisorderWithoutBMI'].std()
+new_std = brfss_5050['NewMetabolicDisorder'].std()
+
+n = len(brfss_5050)  
+
+old_sem = old_std / np.sqrt(n)
+new_sem = new_std / np.sqrt(n)
+
+z = 1.96  # Z-value for 95% confidence
+
+old_ci_lower = old_mean - z * old_sem
+old_ci_upper = old_mean + z * old_sem
+
+new_ci_lower = new_mean - z * new_sem
+new_ci_upper = new_mean + z * new_sem
+
+# Print the results
+print(f"Old Risk Score: {old_mean:.4f} ± {z * old_sem:.4f} (95% CI: {old_ci_lower:.4f}, {old_ci_upper:.4f})")
+print(f"New Risk Score: {new_mean:.4f} ± {z * new_sem:.4f} (95% CI: {new_ci_lower:.4f}, {new_ci_upper:.4f})")
+
+print(old_mean-new_mean)
+
+reduction_factor = (old_mean - new_mean)/old_mean*100
+# reduction_factor = old_mean / new_mean
+
+se_rf = reduction_factor * np.sqrt((old_sem / old_mean) ** 2 + (new_sem / new_mean) ** 2)
+
+ci_rf_lower = reduction_factor * np.exp(-z * se_rf)
+ci_rf_upper = reduction_factor * np.exp(z * se_rf)
+
+print(f"Reduction Factor: {reduction_factor:.4f} ± {se_rf:.4f} (95% CI: {ci_rf_lower:.4f}, {ci_rf_upper:.4f})")
+
+# oldOR = 48.414163
+
+# newOR = oldOR * reduction_factor
+# percentReduction = (1-(newOR/oldOR))*100
+
+# print(1-percentReduction)
