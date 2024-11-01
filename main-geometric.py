@@ -238,11 +238,11 @@ brfss_5050 = brfss_5050_0_rand1._append(brfss_5050_1, ignore_index=True)
 # print(brfss_5050.tail())
 
 # Check the size of each group
-# print(brfss_5050.groupby(['Diabetes_binary']).size())
+print(brfss_5050.groupby(['Diabetes_binary']).size())
 
 # brfss_5050.to_csv('diabetes_binary_health_indicators_BRFSS2023.csv', sep=",", index=False)
 # brfss_5050.to_csv('diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
-# brfss_5050.to_csv('new_diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
+brfss_5050.to_csv('new_diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
 # brfss_5050.to_csv('test_diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
 
 old_mean = brfss_5050['MetabolicDisorderWithoutBMI'].mean()
