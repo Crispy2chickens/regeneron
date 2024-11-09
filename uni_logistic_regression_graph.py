@@ -56,17 +56,19 @@ for variable in independent_variables:
         'CI_Upper': conf_int[1],
     }, ignore_index=True)
 
+plt.rcParams.update({'font.size': 16})
+
 # Step 6: Display the results DataFrame
 print(results_df)
 
 # Step 7: Plot Odds Ratios
-plt.figure(figsize=(13, 6))
+plt.figure(figsize=(14, 7))
 sns.barplot(data=results_df, x='Odds_Ratio', y='Variable', ci=None, palette='viridis')
 plt.axvline(x=1, linestyle='--', color='red')  # Reference line at OR = 1
 plt.title('Odds Ratios for Diabetes Risk Factors')
 plt.xlabel('Odds Ratio')
 plt.ylabel('Variables')
 
-plt.subplots_adjust(left=0.2, right=0.95, top=0.9, bottom=0.1)
+plt.subplots_adjust(left=0.3, right=0.98, top=0.9, bottom=0.1)
 
 plt.show()

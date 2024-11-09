@@ -3,11 +3,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = pd.read_csv('new_diabetes_binary_health_indicators_geometric_BRFSS2023.csv')
+data = pd.read_csv('current_diabetes_binary_health_indicators_geometric_BRFSS2023.csv')
 
 # Extract the predictor and target variables
 X = data['MetabolicDisorderWithoutBMI']
-y = data['Diabetes_binary']
+y = data['AtRisk']
 
 # Calculate ROC curve
 fpr, tpr, thresholds = roc_curve(y, X)

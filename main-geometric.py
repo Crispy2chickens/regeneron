@@ -8,6 +8,8 @@ random.seed(1)
 
 brfss_2023_dataset = pd.read_csv('LLCP2023.csv')
 
+print(brfss_2023_dataset.head())
+
 # print(brfss_2023_dataset.shape)
 # (433323, 350)
 
@@ -216,7 +218,7 @@ def calculate_new_metabolic_geometric_without_BMI(row):
 # # Apply the function to create a new column 'Diabetes_Risk_Index'
 brfss_binary['MetabolicDisorderWithBMI'] = brfss_binary.apply(calculate_metalobic_geometric_with_BMI, axis=1)
 brfss_binary['MetabolicDisorderWithoutBMI'] = brfss_binary.apply(calculate_metalobic_geometric_without_BMI, axis=1)
-brfss_binary['NewMetabolicDisorder'] = brfss_binary.apply(calculate_new_metabolic_geometric_without_BMI, axis=1)
+# brfss_binary['NewMetabolicDisorder'] = brfss_binary.apply(calculate_new_metabolic_geometric_without_BMI, axis=1)
 # print(brfss_binary.tail())
 
 # Get the cases for 1 (diabetic and prediabetic)
@@ -242,47 +244,5 @@ print(brfss_5050.groupby(['Diabetes_binary']).size())
 
 # brfss_5050.to_csv('diabetes_binary_health_indicators_BRFSS2023.csv', sep=",", index=False)
 # brfss_5050.to_csv('diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
-brfss_5050.to_csv('new_diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
+# brfss_5050.to_csv('new_diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
 # brfss_5050.to_csv('test_diabetes_binary_health_indicators_geometric_BRFSS2023.csv', sep=",", index=False)
-
-old_mean = brfss_5050['MetabolicDisorderWithoutBMI'].mean()
-new_mean = brfss_5050['NewMetabolicDisorder'].mean()
-
-old_std = brfss_5050['MetabolicDisorderWithoutBMI'].std()
-new_std = brfss_5050['NewMetabolicDisorder'].std()
-
-n = len(brfss_5050)  
-
-old_sem = old_std / np.sqrt(n)
-new_sem = new_std / np.sqrt(n)
-
-z = 1.96  # Z-value for 95% confidence
-
-old_ci_lower = old_mean - z * old_sem
-old_ci_upper = old_mean + z * old_sem
-
-new_ci_lower = new_mean - z * new_sem
-new_ci_upper = new_mean + z * new_sem
-
-# Print the results
-print(f"Old Risk Score: {old_mean:.4f} ± {z * old_sem:.4f} (95% CI: {old_ci_lower:.4f}, {old_ci_upper:.4f})")
-print(f"New Risk Score: {new_mean:.4f} ± {z * new_sem:.4f} (95% CI: {new_ci_lower:.4f}, {new_ci_upper:.4f})")
-
-print(old_mean-new_mean)
-
-reduction_factor = (old_mean - new_mean)/old_mean*100
-# reduction_factor = old_mean / new_mean
-
-se_rf = reduction_factor * np.sqrt((old_sem / old_mean) ** 2 + (new_sem / new_mean) ** 2)
-
-ci_rf_lower = reduction_factor * np.exp(-z * se_rf)
-ci_rf_upper = reduction_factor * np.exp(z * se_rf)
-
-print(f"Reduction Factor: {reduction_factor:.4f} ± {se_rf:.4f} (95% CI: {ci_rf_lower:.4f}, {ci_rf_upper:.4f})")
-
-# oldOR = 48.414163
-
-# newOR = oldOR * reduction_factor
-# percentReduction = (1-(newOR/oldOR))*100
-
-# print(1-percentReduction)

@@ -2,9 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Parameters
-annual_risk_reduction = 0.306  # 0.5% risk reduction annually
-years = np.arange(0, 21)  # Every year up to 20 years
-initial_population = 136e6  # Initial at-risk population
+annual_risk_reduction = 0.311/2  # 0.5% risk reduction annually
+years = np.arange(0, 16)  # Every year up to 20 years
+# initial_population = 136e6*0.305  # Initial at-risk population
+initial_population = 483173211  # Initial at-risk population
 diabetes_cost_per_patient = 10752  # Annual cost per diabetes patient
 glp1_cost_per_patient = 1142.5  # Annual cost of GLP-1 drugs
 
@@ -24,13 +25,15 @@ savings = diabetes_cases_avoided * diabetes_cost_per_patient  # Savings each yea
 # Calculate the GLP-1 drug cost over the years
 glp1_cost = population_at_risk * glp1_cost_per_patient
 
+plt.rcParams.update({'font.size': 14})
+
 # Plot
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(10, 7))
 plt.plot(years, savings / 1e9, label='Cost-savings from reduced diabetes cases', color='blue')
 plt.plot(years, glp1_cost / 1e9, label='Cost of GLP-1 drugs', color='orange')
 
 # Labels and legend
-plt.title('Cost-savings from GLP-1 Drugs vs Cost of GLP-1 Drugs')
+plt.title('Cost-savings from GLP-1 Drugs vs Cost of GLP-1 Drugs \n (Current Policy) \n')
 plt.xlabel('Years')
 plt.ylabel('Annual Cost (in billions)')
 plt.grid(True)
